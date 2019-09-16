@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "629039792509",
+    "firebase_url": "https://flutterfire-f919a.firebaseio.com",
+    "project_id": "flutterfire-f919a",
+    "storage_bucket": "flutterfire-f919a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:629039792509:android:fd23111f35658a12408c14",
+        "android_client_info": {
+          "package_name": "com.waytaps.flutter_interactive_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "629039792509-nifamc59dba0sj6ominejs765ic6m4fo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbv0J4dGrNrJ80TMf0hVQ-ksHWzOPI0t8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "629039792509-nifamc59dba0sj6ominejs765ic6m4fo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
