@@ -26,21 +26,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       }).catchError((e) {
         return loaded(loggedIn: false, message: e.message);
       });
-    } else if (event is signUpToFirebase) {
-      yield loading();
-      yield await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-              email: event.username, password: event.password)
-          .then((signedInUser) {
-        if (signedInUser.user != null){
-          return loaded(loggedIn: true,authResult: signedInUser);
-        }
-        else
-          return loaded(loggedIn: false);
-      }).catchError((e) {
-        print(e.message);
-        return loaded(loggedIn: false, message: e.message);
-      });
     }
   }
 }

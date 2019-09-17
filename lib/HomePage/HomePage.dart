@@ -14,6 +14,7 @@ class _HomePageState extends State<HomePage> {
         onPressed: () {
           FirebaseAuth.instance.signOut().then((onValue) {
             Navigator.of(context).pushReplacementNamed('/landingpage');
+            Navigator.of(context).pushNamed('/signup');
           });
         },
         child: Text("SingOut"),

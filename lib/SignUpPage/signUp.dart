@@ -1,33 +1,31 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_interactive_app/HomePage/HomePage.dart';
+import 'package:flutter_interactive_app/SignUpPage/bloc.dart';
 
 import '../usermanagement.dart';
-import 'login_bloc.dart';
-import 'login_event.dart';
-import 'login_state.dart';
 
-class LoginPage extends StatefulWidget {
+
+class SignUpPage extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _SignUpPageState createState() => _SignUpPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  String usernameError, passwordError;
+class _SignUpPageState extends State<SignUpPage> {
+  String usernameError, passwordError,nicknameError;
   bool isValidated = true;
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
-  var loginBloc = LoginBloc();
+  TextEditingController nickname = TextEditingController();
+  var signUpBloc = SignUpBloc();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         child: BlocListener(
-          bloc: loginBloc,
-          listener: (BuildContext context, LoginState state) {
+          bloc: signUpBloc,
+          listener: (BuildContext context, SignUpState state) {
             if (state is loaded) {
               if (state .message != null && state.message.isNotEmpty) {
                 Scaffold.of(context).showSnackBar(new SnackBar(
@@ -39,11 +37,11 @@ class _LoginPageState extends State<LoginPage> {
             }
           },
           child: BlocBuilder(
-              bloc: loginBloc,
-              builder: (BuildContext context, LoginState state) {
+              bloc: signUpBloc,
+              builder: (BuildContext context, SignUpState state) {
                 if (state is loading)
                   return Center(child: CircularProgressIndicator());
-                else if (state is LoginInitial)
+                else if (state is SignUpInitial)
                   return mainContain();
                 else if (state is loaded) {
                   if (state.loggedIn) {
@@ -81,29 +79,21 @@ class _LoginPageState extends State<LoginPage> {
               decoration: InputDecoration(
                   labelText: "Password", errorText: passwordError),
             ),
+            TextField(
+              controller: nickname,
+              obscureText: true,
+              decoration: InputDecoration(
+                  labelText: "NickName", errorText: nicknameError),
+            ),
             SizedBox(
               height: 30,
             ),
-            MaterialButton(
-              onPressed: () {
-                validateAndLogin();
-              },
-              color: Colors.orange,
-              child: Text(
-                "LOGIN",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Text("New user?"),
             SizedBox(
               height: 10,
             ),
             MaterialButton(
                 onPressed: () {
-                  moveToSignUpPage(context);
+                  validateAndSignUp();
                 },
                 color: Colors.orange,
                 child: Text(
@@ -119,19 +109,19 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void dispose() {
     super.dispose();
-    loginBloc.dispose();
+    signUpBloc.dispose();
   }
 
-  void validateAndLogin() {
+
+  void validateAndSignUp() {
     setState(() {
       validate();
 
       if (isValidated) {
-        loginBloc.dispatch(loginFirebase(username.text, password.text));
+        signUpBloc.dispatch(signUpToFirebase(username.text, password.text,nickname.text));
       }
     });
   }
-
 
   void validate() {
     if (username.text.isEmpty) {
@@ -148,9 +138,14 @@ class _LoginPageState extends State<LoginPage> {
       passwordError = "";
       isValidated = true;
     }
+
+    if (nickname.text.isEmpty) {
+      nicknameError = "Name can't be empty";
+      isValidated = false;
+    } else {
+      nicknameError = "";
+      isValidated = true;
+    }
   }
 
-  void moveToSignUpPage(BuildContext context) {
-    Navigator.of(context).pushNamed("/signup");
-  }
 }

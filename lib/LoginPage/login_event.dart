@@ -14,9 +14,4 @@ class loginFirebase extends LoginEvent {
 }
 
 
-class signUpToFirebase extends LoginEvent {
-  final String username, password;
 
-  signUpToFirebase(this.username, this.password) : super([username, password]);
-
-}
