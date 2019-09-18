@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_interactive_app/HomePage/HomePage.dart';
 import 'package:flutter_interactive_app/SignUpPage/bloc.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../usermanagement.dart';
 
@@ -19,6 +22,15 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController nickname = TextEditingController();
   var signUpBloc = SignUpBloc();
 
+  File _image;
+  Future getImage() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      _image = image;
+      print('Image Path $_image');
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,9 +77,48 @@ class _SignUpPageState extends State<SignUpPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
+
             SizedBox(
-              height: MediaQuery.of(context).size.height * .30,
+              height: MediaQuery.of(context).size.height * .10,
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Align(
+                  alignment: Alignment.center,
+                  child: CircleAvatar(
+                    radius: 100,
+                    backgroundColor: Color(0xff476cfb),
+                    child: ClipOval(
+                      child: new SizedBox(
+                        width: 180.0,
+                        height: 180.0,
+                        child: (_image!=null)?Image.file(
+                          _image,
+                          fit: BoxFit.fill,
+                        ):Image.network(
+                          "https://images.unsplash.com/photo-1502164980785-f8aa41d53611?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60",
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 180.0),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.camera,
+                      size: 30.0,
+                    ),
+                    onPressed: () {
+                      getImage();
+                    },
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10,),
             TextField(
               controller: username,
               decoration: InputDecoration(
@@ -81,7 +132,6 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             TextField(
               controller: nickname,
-              obscureText: true,
               decoration: InputDecoration(
                   labelText: "NickName", errorText: nicknameError),
             ),
@@ -118,7 +168,7 @@ class _SignUpPageState extends State<SignUpPage> {
       validate();
 
       if (isValidated) {
-        signUpBloc.dispatch(signUpToFirebase(username.text, password.text,nickname.text));
+        signUpBloc.dispatch(signUpToFirebase(username.text, password.text,nickname.text,_image));
       }
     });
   }

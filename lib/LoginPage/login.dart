@@ -1,15 +1,16 @@
-import 'dart:math';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_interactive_app/HomePage/HomePage.dart';
-
+import 'package:flutter_interactive_app/SignUpPage/signUp.dart';
 import '../usermanagement.dart';
 import 'login_bloc.dart';
 import 'login_event.dart';
 import 'login_state.dart';
 
 class LoginPage extends StatefulWidget {
+
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -20,6 +21,20 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
   var loginBloc = LoginBloc();
+
+  FirebaseUser user;
+
+
+  @override
+  void didUpdateWidget(LoginPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+  }
+  @override
+  void initState() {
+    super.initState();
+    getFirebaseUser(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +56,7 @@ class _LoginPageState extends State<LoginPage> {
           child: BlocBuilder(
               bloc: loginBloc,
               builder: (BuildContext context, LoginState state) {
+                loginBloc.dispatch(getFirebaseUser(context));
                 if (state is loading)
                   return Center(child: CircularProgressIndicator());
                 else if (state is LoginInitial)
@@ -151,6 +167,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void moveToSignUpPage(BuildContext context) {
-    Navigator.of(context).pushNamed("/signup");
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SignUpPage()),
+    );
   }
 }
