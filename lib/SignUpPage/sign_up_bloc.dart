@@ -32,23 +32,31 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   Future<SignUpState> updateUser(
       AuthResult signedInUser, signUpToFirebase event) async {
     if (signedInUser.user != null) {
-
-       return await uploadPic(event.file).then((snapshot) async{
-        debugPrint("hey after pic");
+      if (event.file != null) {
+        return await uploadPic(event.file).then((snapshot) async {
+          var updateUser = new UserUpdateInfo();
+          updateUser.displayName = event.nickname;
+          debugPrint(snapshot.uploadSessionUri.toString());
+          updateUser.photoUrl = await snapshot.ref.getDownloadURL();
+          return await signedInUser.user
+              .updateProfile(updateUser)
+              .then((updatedUser) {
+            return loaded(loggedIn: true);
+          }).catchError((e) {
+            return loaded(loggedIn: false, message: e.message);
+          });
+        });
+      } else {
         var updateUser = new UserUpdateInfo();
         updateUser.displayName = event.nickname;
-        debugPrint(snapshot.uploadSessionUri.toString());
-        updateUser.photoUrl = await snapshot.ref.getDownloadURL();
         return await signedInUser.user
             .updateProfile(updateUser)
             .then((updatedUser) {
-              debugPrint("updated profile");
           return loaded(loggedIn: true);
         }).catchError((e) {
           return loaded(loggedIn: false, message: e.message);
         });
-      });
-
+      }
     } else {
       return loaded(loggedIn: false);
     }

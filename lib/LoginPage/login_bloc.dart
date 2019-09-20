@@ -20,7 +20,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
               email: event.username, password: event.password)
           .then((signedInUser) {
         if (signedInUser.user != null)
-          return loaded(loggedIn: true);
+          return loaded(loggedIn: true,authResult: signedInUser.user);
         else
           return loaded(loggedIn: false);
       }).catchError((e) {
@@ -30,7 +30,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       yield loading();
       yield await FirebaseAuth.instance.currentUser().then((user) {
         if (user != null)
-          return loaded(loggedIn: true);
+          return loaded(loggedIn: true,authResult: user);
         else
           return loaded(loggedIn: false);
       });

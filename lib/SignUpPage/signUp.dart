@@ -122,7 +122,7 @@ class _SignUpPageState extends State<SignUpPage> {
             TextField(
               controller: username,
               decoration: InputDecoration(
-                  labelText: "Username", errorText: usernameError),
+                  labelText: "Email", errorText: usernameError),
             ),
             TextField(
               controller: password,
@@ -175,7 +175,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void validate() {
     if (username.text.isEmpty) {
-      usernameError = "Username can't be empty";
+      usernameError = "Email can't be empty";
       isValidated = false;
     } else {
       isValidated = true;

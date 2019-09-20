@@ -16,7 +16,7 @@ class loading extends LoginState {}
 class loaded extends LoginState {
   final bool loggedIn;
   final String message;
-  final AuthResult authResult;
+  final FirebaseUser authResult;
 
   loaded({this.loggedIn,this.message,this.authResult}) : super([loggedIn,message,authResult]);
 }
