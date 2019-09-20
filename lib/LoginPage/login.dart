@@ -23,6 +23,8 @@ class _LoginPageState extends State<LoginPage> {
 
   FirebaseUser user;
 
+  bool passwordVisible = true;
+
   @override
   void didUpdateWidget(LoginPage oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -37,150 +39,160 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: BlocListener<LoginBloc, LoginState>(
-            key: Key('loginBlocListener'),
-            bloc: loginBloc,
-            listener: (BuildContext context, LoginState state) {
-              if (state is loaded) {
-                if (state.message != null && state.message.isNotEmpty) {
-                  Scaffold.of(context).showSnackBar(new SnackBar(
-                    content: new Text(state.message),
-                  ));
-                } else if (state.authResult != null) {
-                  debugPrint("State changes");
-                  UserManagement().storeNewUser(state.authResult, context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomePage()),
-                  );
-                }
-              }
-            },
-            child: Container(
-                child: BlocBuilder(
-                    bloc: loginBloc,
-                    builder: (BuildContext context, LoginState state) {
-                      if (state is LoginInitial)
-                        return mainContain();
-                      else if (state is loaded) {
-                        if (state.loggedIn) {
-                          if (state.message == null) {
-                            return Container(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else {
-                            return mainContain(state
-                                .message);
-                          }
-                        } else return mainContain();
-                      }else {
-                          return Center(child: CircularProgressIndicator());
-                        }
-                      }
-                      )
-                      ,
-                      )
-                      ,
-                      )
-                      ,
+      body: BlocListener<LoginBloc, LoginState>(
+        key: Key('loginBlocListener'),
+        bloc: loginBloc,
+        listener: (BuildContext context, LoginState state) {
+          if (state is loaded) {
+            if (state.message != null && state.message.isNotEmpty) {
+              Scaffold.of(context).showSnackBar(new SnackBar(
+                content: new Text(state.message),
+              ));
+            } else if (state.authResult != null) {
+              debugPrint("State changes");
+              UserManagement().storeNewUser(state.authResult, context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            }
+          }
+        },
+        child: Container(
+          child: BlocBuilder(
+              bloc: loginBloc,
+              builder: (BuildContext context, LoginState state) {
+                if (state is LoginInitial)
+                  return mainContain();
+                else if (state is loaded) {
+                  if (state.loggedIn) {
+                    if (state.message == null) {
+                      return Container(
+                        child: CircularProgressIndicator(),
                       );
+                    } else {
+                      return mainContain(state.message);
                     }
+                  } else
+                    return mainContain();
+                } else {
+                  return Center(child: CircularProgressIndicator());
+                }
+              }),
+        ),
+      ),
+    );
+  }
 
-                    Widget mainContain([String message]) {
-            return SingleChildScrollView(
-            child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
+  Widget mainContain([String message]) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
             SizedBox(
-            height: MediaQuery.of(context).size.height * .30,
+              height: MediaQuery.of(context).size.height * .30,
             ),
             TextField(
-            controller: username,
-            decoration:
-            InputDecoration(labelText: "Email", errorText: usernameError),
+              controller: username,
+              decoration:
+                  InputDecoration(labelText: "Email", errorText: usernameError),
             ),
             TextField(
-            controller: password,
-            obscureText: true,
-            decoration: InputDecoration(
-            labelText: "Password", errorText: passwordError),
+              controller: password,
+              obscureText: passwordVisible,
+              decoration: InputDecoration(
+                labelText: "Password",
+                errorText: passwordError,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    // Based on passwordVisible state choose the icon
+                    passwordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Theme.of(context).primaryColorDark,
+                  ),
+                  onPressed: () {
+                    // Update the state i.e. toogle the state of passwordVisible variable
+                    setState(() {
+                      passwordVisible = !passwordVisible;
+                    });
+                  },
+                ),
+              ),
             ),
             SizedBox(
-            height: 30,
+              height: 30,
             ),
             MaterialButton(
-            onPressed: () {
-            validateAndLogin();
-            },
-            color: Colors.orange,
-            child: Text(
-            "LOGIN",
-            style: TextStyle(color: Colors.white),
-            ),
+              onPressed: () {
+                validateAndLogin();
+              },
+              color: Colors.orange,
+              child: Text(
+                "LOGIN",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
             SizedBox(
-            height: 10,
+              height: 10,
             ),
             Text("New user?"),
             SizedBox(
-            height: 10,
+              height: 10,
             ),
             MaterialButton(
-            onPressed: () {
-            moveToSignUpPage(context);
-            },
-            color: Colors.orange,
-            child: Text(
-            "SIGNUP",
-            style: TextStyle(color: Colors.white),
-            ))
-            ],
-            ),
-            ),
-            );
-            }
+                onPressed: () {
+                  moveToSignUpPage(context);
+                },
+                color: Colors.orange,
+                child: Text(
+                  "SIGNUP",
+                  style: TextStyle(color: Colors.white),
+                ))
+          ],
+        ),
+      ),
+    );
+  }
 
-                @override
-                void dispose() {
-        super.dispose();
-        loginBloc.dispose();
-        debugPrint("disponsed");
-        }
+  @override
+  void dispose() {
+    super.dispose();
+    loginBloc.dispose();
+    debugPrint("disponsed");
+  }
 
-            void validateAndLogin() {
+  void validateAndLogin() {
     setState(() {
-    validate();
+      validate();
 
-    if (isValidated) {
-    loginBloc.dispatch(loginFirebase(username.text, password.text));
-    }
+      if (isValidated) {
+        loginBloc.dispatch(loginFirebase(username.text, password.text));
+      }
     });
-    }
+  }
 
-        void validate()
-    {
-      if (username.text.isEmpty) {
-        usernameError = "Username can't be empty";
-        isValidated = false;
-      } else {
-        isValidated = true;
-        usernameError = "";
-      }
-      if (password.text.isEmpty) {
-        passwordError = "Password can't be empty";
-        isValidated = false;
-      } else {
-        passwordError = "";
-        isValidated = true;
-      }
+  void validate() {
+    if (username.text.isEmpty) {
+      usernameError = "Username can't be empty";
+      isValidated = false;
+    } else {
+      isValidated = true;
+      usernameError = "";
     }
-
-    void moveToSignUpPage(BuildContext context) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => SignUpPage()),
-      );
+    if (password.text.isEmpty) {
+      passwordError = "Password can't be empty";
+      isValidated = false;
+    } else {
+      passwordError = "";
+      isValidated = true;
     }
   }
+
+  void moveToSignUpPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SignUpPage()),
+    );
+  }
+}

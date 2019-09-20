@@ -23,6 +23,8 @@ class _SignUpPageState extends State<SignUpPage> {
   var signUpBloc = SignUpBloc();
 
   File _image;
+
+  bool passwordVisible = false;
   Future getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
@@ -126,9 +128,24 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             TextField(
               controller: password,
-              obscureText: true,
+              obscureText: passwordVisible,
               decoration: InputDecoration(
-                  labelText: "Password", errorText: passwordError),
+                labelText: "Password",
+                errorText: passwordError,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    // Based on passwordVisible state choose the icon
+                    passwordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Theme.of(context).primaryColorDark,
+                  ),
+                  onPressed: () {
+                    // Update the state i.e. toogle the state of passwordVisible variable
+                    setState(() {
+                      passwordVisible = !passwordVisible;
+                    });
+                  },
+                ),
+              ),
             ),
             TextField(
               controller: nickname,
