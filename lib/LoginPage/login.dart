@@ -25,6 +25,8 @@ class _LoginPageState extends State<LoginPage> {
 
   bool passwordVisible = true;
 
+  bool isChecked = false;
+
   @override
   void didUpdateWidget(LoginPage oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -32,7 +34,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
-    super.initState();
     loginBloc.dispatch(getFirebaseUser(context));
   }
 
@@ -49,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
                 content: new Text(state.message),
               ));
             } else if (state.authResult != null) {
-              debugPrint("State changes");
+
               UserManagement().storeNewUser(state.authResult, context);
               Navigator.pushReplacement(
                 context,
@@ -75,6 +76,11 @@ class _LoginPageState extends State<LoginPage> {
                     }
                   } else
                     return mainContain();
+                }else if(state is changeCheckBoxState){
+                  isChecked = state.checked;
+                  username.text =  state.email;
+                  password.text =  state.password;
+                  return mainContain();
                 } else {
                   return Center(child: CircularProgressIndicator());
                 }
@@ -119,6 +125,22 @@ class _LoginPageState extends State<LoginPage> {
                   },
                 ),
               ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Checkbox(
+                  value: isChecked,
+                  onChanged: (value) {
+                    loginBloc
+                        .dispatch(new checkBoxChangeListener(context, value));
+                  },
+                ),
+                Text("Remember me"),
+                SizedBox(
+                  width: 20,
+                )
+              ],
             ),
             SizedBox(
               height: 30,

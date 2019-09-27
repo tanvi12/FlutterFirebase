@@ -11,12 +11,18 @@ class loginFirebase extends LoginEvent {
   final String username, password;
 
   loginFirebase(this.username, this.password) : super([username, password]);
-
 }
 
 class getFirebaseUser extends LoginEvent {
   final BuildContext context;
+
   getFirebaseUser(this.context) : super([context]);
 }
 
+class checkBoxChangeListener extends LoginEvent {
+  final BuildContext context;
+  bool isChecked;
 
+  checkBoxChangeListener(this.context, this.isChecked)
+      : super([context, isChecked]);
+}

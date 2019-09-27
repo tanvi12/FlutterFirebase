@@ -21,3 +21,9 @@ class loaded extends LoginState {
   loaded({this.loggedIn,this.message,this.authResult}) : super([loggedIn,message,authResult]);
 }
 
+class changeCheckBoxState extends LoginState{
+  final bool checked;
+  final String email,password;
+  changeCheckBoxState({this.checked,this.email,this.password}) : super([checked,email,password]);
+}
+
