@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_interactive_app/LoginPage/login.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'home_bloc.dart';
 import 'home_event.dart';
@@ -14,11 +15,89 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var homeBloc = new HomeBloc();
+  TextEditingController username = TextEditingController();
+  String usernameError;
 
   @override
   void initState() {
     super.initState();
     homeBloc.dispatch(getFirebaseUser());
+  }
+
+  void _showImageSelectionDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              title: Text('PickImage'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  InkWell(
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Text("Camera"),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      homeBloc.dispatch(updateProfilePhoto(ImageSource.camera));
+                    },
+                  ),
+                  InkWell(
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Text("Gallary"),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      homeBloc
+                          .dispatch(updateProfilePhoto(ImageSource.gallery));
+                    },
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                FlatButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('Cancel'))
+              ]);
+        });
+  }
+
+  void _showEditProfileDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              title: Text('Edit Profile'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  TextField(
+                    controller: username,
+                    decoration: InputDecoration(
+                        labelText: "Username", errorText: usernameError),
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                FlatButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      if (username.text.length != 0) {
+                        homeBloc.dispatch(updateProfile(username.text));
+                      }
+                    },
+                    child: Text('Save')),
+                FlatButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('Cancel'))
+              ]);
+        });
   }
 
   @override
@@ -48,13 +127,13 @@ class _HomePageState extends State<HomePage> {
                 context,
                 MaterialPageRoute(builder: (context) => LoginPage()),
               );
-            }else{
+            } else {
               Scaffold.of(context).showSnackBar(new SnackBar(
                 content: new Text(state.message),
               ));
             }
-          }else if(state is loaded){
-            if(state.message!=null){
+          } else if (state is loaded) {
+            if (state.message != null) {
               Scaffold.of(context).showSnackBar(new SnackBar(
                 content: new Text(state.message),
               ));
@@ -76,16 +155,21 @@ class _HomePageState extends State<HomePage> {
                         alignment: Alignment.center,
                         child: CircleAvatar(
                           radius: 100,
-                          backgroundColor: Color(0xff476cfb),
+                          backgroundColor: Colors.transparent,
                           child: ClipOval(
                             child: new SizedBox(
-                              width: 180.0,
-                              height: 180.0,
-                              child: Image.network(
-                                state.authResult.photoUrl == null
-                                    ? "https://images.unsplash.com/photo-1502164980785-f8aa41d53611?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60"
-                                    : state.authResult.photoUrl,
-                                fit: BoxFit.fill,
+                              width: 195.0,
+                              height: 195.0,
+                              child: InkWell(
+                                onTap: () {
+                                  _showImageSelectionDialog(context);
+                                },
+                                child: Image.network(
+                                  state.authResult.photoUrl == null
+                                      ? "https://images.unsplash.com/photo-1502164980785-f8aa41d53611?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60"
+                                      : state.authResult.photoUrl,
+                                  fit: BoxFit.fill,
+                                ),
                               ),
                             ),
                           ),
@@ -95,24 +179,43 @@ class _HomePageState extends State<HomePage> {
                         padding: EdgeInsets.only(top: 180.0),
                         child: IconButton(
                           icon: Icon(
-                            Icons.camera,
+                            Icons.edit,
                             size: 30.0,
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            username.text = state.authResult.displayName;
+                            _showEditProfileDialog(context);
+                          },
                         ),
                       ),
                     ],
                   ),
-                  Text(state.authResult.email != null
-                      ? state.authResult.email
-                      : ""),
-                  Text(state.authResult.displayName != null
-                      ? state.authResult.displayName
-                      : ""),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          "Email",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        Text(state.authResult.email != null
+                            ? state.authResult.email
+                            : ""),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text("Name", style: TextStyle(color: Colors.red)),
+                        Text(state.authResult.displayName != null
+                            ? state.authResult.displayName
+                            : "")
+                      ],
+                    ),
+                  )
                 ],
               );
             } else
-              return CircularProgressIndicator();
+              return Center(child: CircularProgressIndicator());
           },
         ),
       ),
@@ -121,7 +224,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     homeBloc.dispose();
   }

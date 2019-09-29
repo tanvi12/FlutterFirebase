@@ -8,14 +8,13 @@ import 'package:image_picker/image_picker.dart';
 
 import '../usermanagement.dart';
 
-
 class SignUpPage extends StatefulWidget {
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  String usernameError, passwordError,nicknameError;
+  String usernameError, passwordError, nicknameError;
   bool isValidated = true;
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
@@ -25,14 +24,48 @@ class _SignUpPageState extends State<SignUpPage> {
   File _image;
 
   bool passwordVisible = false;
-  Future getImage() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
-    setState(() {
-      _image = image;
-      print('Image Path $_image');
-    });
+  void _showMaterialDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              title: Text('PickImage'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  InkWell(
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Text("Camera"),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      signUpBloc.dispatch(selectImage(ImageSource.camera));
+                    },
+                  ),
+                  InkWell(
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Text("Gallary"),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      signUpBloc.dispatch(selectImage(ImageSource.gallery));
+                    },
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                FlatButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('Cancel'))
+              ]);
+        });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,12 +74,17 @@ class _SignUpPageState extends State<SignUpPage> {
           bloc: signUpBloc,
           listener: (BuildContext context, SignUpState state) {
             if (state is loaded) {
-              if (state .message != null && state.message.isNotEmpty) {
+              if (state.message != null && state.message.isNotEmpty) {
                 Scaffold.of(context).showSnackBar(new SnackBar(
                   content: new Text(state.message),
                 ));
               } else if (state.authResult != null) {
                 UserManagement().storeNewUser(state.authResult.user, context);
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
               }
             }
           },
@@ -55,11 +93,16 @@ class _SignUpPageState extends State<SignUpPage> {
               builder: (BuildContext context, SignUpState state) {
                 if (state is loading)
                   return Center(child: CircularProgressIndicator());
-                else if (state is SignUpInitial)
+                else if (state is SignUpInitial || state is imageSelected) {
+                  if (state is imageSelected) {
+                    _image = state.image;
+                  }
                   return mainContain();
-                else if (state is loaded) {
+                } else if (state is loaded) {
                   if (state.loggedIn) {
-                    return HomePage();
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
                   } else {
                     return mainContain(state.message);
                   }
@@ -79,7 +122,6 @@ class _SignUpPageState extends State<SignUpPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-
             SizedBox(
               height: MediaQuery.of(context).size.height * .10,
             ),
@@ -95,13 +137,15 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: new SizedBox(
                         width: 180.0,
                         height: 180.0,
-                        child: (_image!=null)?Image.file(
-                          _image,
-                          fit: BoxFit.fill,
-                        ):Image.network(
-                          "https://images.unsplash.com/photo-1502164980785-f8aa41d53611?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60",
-                          fit: BoxFit.fill,
-                        ),
+                        child: (_image != null)
+                            ? Image.file(
+                                _image,
+                                fit: BoxFit.fill,
+                              )
+                            : Image.network(
+                                "https://images.unsplash.com/photo-1502164980785-f8aa41d53611?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60",
+                                fit: BoxFit.fill,
+                              ),
                       ),
                     ),
                   ),
@@ -114,17 +158,19 @@ class _SignUpPageState extends State<SignUpPage> {
                       size: 30.0,
                     ),
                     onPressed: () {
-                      getImage();
+                      _showMaterialDialog(context);
                     },
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 10,),
+            SizedBox(
+              height: 10,
+            ),
             TextField(
               controller: username,
-              decoration: InputDecoration(
-                  labelText: "Email", errorText: usernameError),
+              decoration:
+                  InputDecoration(labelText: "Email", errorText: usernameError),
             ),
             TextField(
               controller: password,
@@ -179,13 +225,13 @@ class _SignUpPageState extends State<SignUpPage> {
     signUpBloc.dispose();
   }
 
-
   void validateAndSignUp() {
     setState(() {
       validate();
 
       if (isValidated) {
-        signUpBloc.dispatch(signUpToFirebase(username.text, password.text,nickname.text,_image));
+        signUpBloc.dispatch(signUpToFirebase(
+            username.text, password.text, nickname.text, _image));
       }
     });
   }
@@ -214,5 +260,4 @@ class _SignUpPageState extends State<SignUpPage> {
       isValidated = true;
     }
   }
-
 }

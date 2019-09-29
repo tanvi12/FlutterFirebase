@@ -29,7 +29,7 @@ dependencies:
   firebase_auth: ^0.14.0+5
   firebase_storage: ^3.0.6
   font_awesome_flutter: ^8.2.0
-  image_picker: 0.4.12+1
+  image_picker: 0.6.0+3
   shared_preferences:
 dev_dependencies:
   flutter_test:
