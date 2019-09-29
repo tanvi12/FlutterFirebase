@@ -26,3 +26,9 @@ class checkBoxChangeListener extends LoginEvent {
   checkBoxChangeListener(this.context, this.isChecked)
       : super([context, isChecked]);
 }
+
+class sendResetPaswordLink extends LoginEvent {
+  String email;
+
+  sendResetPaswordLink(this.email) : super([email]);
+}

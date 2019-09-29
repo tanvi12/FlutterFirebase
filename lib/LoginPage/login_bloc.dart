@@ -36,7 +36,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             }
             return loaded(loggedIn: true, authResult: signedInUser.user);
           });
-
         } else
           return loaded(loggedIn: false);
       }).catchError((e) {
@@ -59,13 +58,22 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
               return changeCheckBoxState(checked: false);
             }
           });
-
         }
       });
     } else if (event is checkBoxChangeListener) {
       yield changeCheckBoxState(checked: event.isChecked);
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setBool(_kRememberMe, event.isChecked);
+    } else if (event is sendResetPaswordLink) {
+      yield loading();
+      yield await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: event.email)
+          .then((onValue) {
+        return loaded(
+            loggedIn: false, message: "Password reset link has been sent!");
+      }).catchError((onError) {
+        return loaded(loggedIn: false, message: onError.message);
+      });
     }
   }
 }

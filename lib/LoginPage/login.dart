@@ -50,7 +50,6 @@ class _LoginPageState extends State<LoginPage> {
                 content: new Text(state.message),
               ));
             } else if (state.authResult != null) {
-
               UserManagement().storeNewUser(state.authResult, context);
               Navigator.pushReplacement(
                 context,
@@ -76,10 +75,10 @@ class _LoginPageState extends State<LoginPage> {
                     }
                   } else
                     return mainContain();
-                }else if(state is changeCheckBoxState){
+                } else if (state is changeCheckBoxState) {
                   isChecked = state.checked;
-                  username.text =  state.email;
-                  password.text =  state.password;
+                  username.text = state.email;
+                  password.text = state.password;
                   return mainContain();
                 } else {
                   return Center(child: CircularProgressIndicator());
@@ -155,6 +154,16 @@ class _LoginPageState extends State<LoginPage> {
                 style: TextStyle(color: Colors.white),
               ),
             ),
+            MaterialButton(
+              color: Colors.grey,
+              onPressed: () {
+                validateEmailAndSendLink();
+              },
+              child: Text(
+                "FORGET PASSWORD?",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
             SizedBox(
               height: 10,
             ),
@@ -196,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void validate() {
     if (username.text.isEmpty) {
-      usernameError = "Username can't be empty";
+      usernameError = "Email can't be empty";
       isValidated = false;
     } else {
       isValidated = true;
@@ -216,5 +225,18 @@ class _LoginPageState extends State<LoginPage> {
       context,
       MaterialPageRoute(builder: (context) => SignUpPage()),
     );
+  }
+
+  void validateEmailAndSendLink() {
+    setState(() {
+      if (username.text.isEmpty) {
+        usernameError = "Email can't be empty";
+        isValidated = false;
+      } else {
+        isValidated = true;
+        usernameError = "";
+        loginBloc.dispatch(sendResetPaswordLink(username.text));
+      }
+    });
   }
 }
